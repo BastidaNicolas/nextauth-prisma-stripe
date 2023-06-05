@@ -28,6 +28,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
         ```
         npx prisma generate
         ```
+    - Initiate a global PrismaClient instance in the `lib/prisma.ts` file. In this case, I placed it within the same Prisma folder, `prisma/prisma.ts`. ([documentation](https://vercel.com/guides/nextjs-prisma-postgres#step-4.-install-and-generate-prisma-client))
 
 3. Setup NextAuth ([documentation](https://next-auth.js.org/getting-started/example)):
     - Install NextAuth and the Prisma adapter:
@@ -36,7 +37,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
         ```
     - Create the `/api/auth/[...nextauth]/route.ts` API route.
         - Initialization and configuration of the route handlers can be found [here](https://next-auth.js.org/configuration/initialization#route-handlers-app).
-        - Initialize a new PrismaClient and add the PrismaAdapter (reference: [PrismaAdapter](https://authjs.dev/reference/adapter/prisma)).
+        - Import prisma.ts and add the PrismaAdapter (reference: [PrismaAdapter](https://authjs.dev/reference/adapter/prisma)).
         - Import and add the desired authentication providers (in this case, [GoogleProvider](https://next-auth.js.org/providers/google)).
     - Wrap your main component in a Provider component that contains the SessionProvider.
     - Create a sign-in button client component that use the `useSession`, `signIn`, and `signOut` hooks from `"next-auth/react"`.
