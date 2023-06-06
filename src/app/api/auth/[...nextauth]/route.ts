@@ -1,11 +1,11 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { Adapter } from "next-auth/adapters";
 import prisma from "../../../../../prisma/prisma";
 import Stripe from "stripe";
 
-const handler = NextAuth({
+export const authOptions:NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as Adapter,
   providers: [
     GoogleProvider({
@@ -14,6 +14,13 @@ const handler = NextAuth({
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
+  callbacks:{
+    async session({ session, user }) {
+      session!.user!.id = user.id;
+      session!.user!.stripeCustomerId = user.stripeCustomerId as string;
+      return session;
+    },
+  },
   events:{
     createUser: async ({ user }) => {
 
@@ -35,6 +42,9 @@ const handler = NextAuth({
       })
     }
   }
-});
+}
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
+
