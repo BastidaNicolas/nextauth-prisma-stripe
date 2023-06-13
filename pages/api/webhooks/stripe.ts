@@ -19,13 +19,12 @@ const handler = async (
 
   const webhookSecret: string = process.env.STRIPE_WEBHOOK_SECRET!;
 
-  if (req.method === "POST") {
+  // if (req.method === "POST") {
     const sig = req.headers["stripe-signature"];
-
+    const body = await getRawBody(req);
     let event: Stripe.Event;
 
     try {
-      const body = await getRawBody(req);
       event = stripe.webhooks.constructEvent(body, sig!, webhookSecret);
     } catch (err) {
       // On error, log and return the error message
@@ -81,10 +80,10 @@ const handler = async (
 
     // Return a response to acknowledge receipt of the event
     res.json({ received: true });
-  } else {
-    res.setHeader("Allow", "POST");
-    res.status(405).end("Method Not Allowed");
-  }
+  // } else {
+  //   res.setHeader("Allow", "POST");
+  //   res.status(405).end("Method Not Allowed");
+  // }
 };
 
 // const buffer = (req: NextApiRequest) => {
