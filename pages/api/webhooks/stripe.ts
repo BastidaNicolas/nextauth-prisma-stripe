@@ -20,11 +20,12 @@ const handler = async (
   const webhookSecret: string = process.env.STRIPE_WEBHOOK_SECRET!;
 
   if (req.method === "POST") {
+    const sig = req.headers["stripe-signature"];
+
     let event: Stripe.Event;
 
     try {
       const body = await getRawBody(req);
-      const sig = req.headers["stripe-signature"];
       event = stripe.webhooks.constructEvent(body, sig!, webhookSecret);
     } catch (err) {
       // On error, log and return the error message
