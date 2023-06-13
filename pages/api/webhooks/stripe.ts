@@ -2,6 +2,12 @@ import Stripe from "stripe";
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "../../../prisma/prisma";
 
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 const handler = async (
   req: NextApiRequest,
   res: NextApiResponse
@@ -78,12 +84,6 @@ const handler = async (
     res.setHeader("Allow", "POST");
     res.status(405).end("Method Not Allowed");
   }
-};
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
 };
 
 const buffer = (req: NextApiRequest) => {
