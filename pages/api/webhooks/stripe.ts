@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import { NextApiRequest, NextApiResponse } from "next";
-import { buffer } from 'micro';
+import getRawBody from "raw-body";
 import prisma from "../../../prisma/prisma";
 
 export const config = {
@@ -23,9 +23,9 @@ const handler = async (
     let event: Stripe.Event;
 
     try {
-      const body = await buffer(req);
+      const body = await getRawBody(req);
       const sig = req.headers["stripe-signature"];
-      event = stripe.webhooks.constructEvent(body.toString(), sig!, webhookSecret);
+      event = stripe.webhooks.constructEvent(body, sig!, webhookSecret);
     } catch (err) {
       // On error, log and return the error message
       console.log(`❌ Error message: ${err}`);
