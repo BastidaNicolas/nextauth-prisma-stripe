@@ -4,7 +4,10 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 import Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+  const body = await req.json();
+  console.log(body)
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2022-11-15",
   });
 
@@ -28,7 +31,7 @@ export async function POST(req: NextRequest) {
     line_items: [
       {
         // temporarily hard coded price (subscription)
-        price: "price_1NDCZ3IMQotP1KSIxFBL4LwI",
+        price: body,
         quantity: 1,
       },
     ],
