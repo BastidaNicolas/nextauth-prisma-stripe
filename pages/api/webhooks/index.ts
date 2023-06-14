@@ -9,11 +9,11 @@ const cors = Cors({
   allowMethods: ['POST', 'HEAD'],
 });
 
-// export const config = {
-//   api: {
-//     bodyParser: false,
-//   },
-// };
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 // async function buffer(readable:any) {
 //   const chunks = [];
@@ -52,31 +52,31 @@ const handler = async (
     console.log("✅ Success:", event.id);
 
     // Cast event data to Stripe object
-    // if (event.type === "payment_intent.succeeded") {
-    //   const stripeObject: Stripe.PaymentIntent = event.data
-    //     .object as Stripe.PaymentIntent;
-    //   console.log(`💰 PaymentIntent status: ${stripeObject.status}`);
-    // } else if (event.type === "charge.succeeded") {
-    //   const charge = event.data.object as Stripe.Charge;
-    //   console.log(`💵 Charge id: ${charge.id}`);
-    // } else {
-    //   console.warn(`🤷‍♀️ Unhandled event type: ${event.type}`);
-    // }
+    if (event.type === "payment_intent.succeeded") {
+      const stripeObject: Stripe.PaymentIntent = event.data
+        .object as Stripe.PaymentIntent;
+      console.log(`💰 PaymentIntent status: ${stripeObject.status}`);
+    } else if (event.type === "charge.succeeded") {
+      const charge = event.data.object as Stripe.Charge;
+      console.log(`💵 Charge id: ${charge.id}`);
+    } else {
+      console.warn(`🤷‍♀️ Unhandled event type: ${event.type}`);
+    }
 
-    switch (event.type) {
-      case "customer.subscription.created":
-    const subscription = event.data.object as Stripe.Subscription;
-        await prisma.user.update({
-          // Find the customer in our database with the Stripe customer ID linked to this purchase
-          where: {
-            stripeCustomerId: subscription.customer as string,
-          },
-          // Update that customer so their status is now active
-          data: {
-            isActive: true,
-          },
-        });
-        break;
+    // switch (event.type) {
+    //   case "customer.subscription.created":
+    // const subscription = event.data.object as Stripe.Subscription;
+    //     await prisma.user.update({
+    //       // Find the customer in our database with the Stripe customer ID linked to this purchase
+    //       where: {
+    //         stripeCustomerId: subscription.customer as string,
+    //       },
+    //       // Update that customer so their status is now active
+    //       data: {
+    //         isActive: true,
+    //       },
+    //     });
+    //     break;
       // case "customer.subscription.deleted":
       //   await prisma.user.update({
       //     // Find the customer in our database with the Stripe customer ID linked to this purchase
@@ -89,9 +89,9 @@ const handler = async (
       //     },
       //   });
       //   break;
-      default:
-        console.warn(`🤷‍♀️ Unhandled event type: ${event.type}`);
-    }
+    //   default:
+    //     console.warn(`🤷‍♀️ Unhandled event type: ${event.type}`);
+    // }
 
     // Return a response to acknowledge receipt of the event
     res.json({ received: true });
