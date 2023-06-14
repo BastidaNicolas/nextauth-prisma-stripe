@@ -19,9 +19,9 @@ export const config = {
   },
 };
 
-const cors = Cors({
-  allowMethods: ["POST", "HEAD"],
-});
+// const cors = Cors({
+//   allowMethods: ["POST", "HEAD"],
+// });
 
 const webhookHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "POST") {
@@ -83,4 +83,5 @@ const webhookHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default cors(webhookHandler as any);
+// export default cors(webhookHandler as any);
+export default webhookHandler;
