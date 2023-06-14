@@ -9,11 +9,11 @@ import prisma from "../../../prisma/prisma";
 //   allowMethods: ['POST', 'HEAD'],
 // });
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// export const config = {
+//   api: {
+//     bodyParser: false,
+//   },
+// };
 
 // async function buffer(readable:any) {
 //   const chunks = [];
@@ -22,24 +22,25 @@ export const config = {
 //   }
 //   return Buffer.concat(chunks);
 // }
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2022-11-15",
+});
+
+const webhookSecret: string = process.env.STRIPE_WEBHOOK_SECRET!;
 
 const handler = async (
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> => {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: "2022-11-15",
-  });
 
-  const webhookSecret: string = process.env.STRIPE_WEBHOOK_SECRET!;
 
   if (req.method === "POST") {
+    const body = await buffer(req);
     const sig = req.headers["stripe-signature"]!;
     let event: Stripe.Event
 
     try {
-      const body = await buffer(req);
-      event = stripe.webhooks.constructEvent(body.toString(), sig, webhookSecret);
+      event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
     } catch (err) {
       // On error, log and return the error message
       console.log(`❌ Error message: ${err}`);
