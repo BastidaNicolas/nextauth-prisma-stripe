@@ -1,9 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import Cors from "micro-cors";
 import Stripe from "stripe";
-import prisma from "../../../prisma/prisma";
+import prisma from "../../../../prisma/prisma";
 import getRawBody from "raw-body";
+import { NextRequest, NextResponse } from "next/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   // https://github.com/stripe/stripe-node#configuration
@@ -23,10 +23,10 @@ export const config = {
 //   allowMethods: ["POST", "HEAD"],
 // });
 
-const webhookHandler = async (req: NextApiRequest, res: NextApiResponse) => {
+const webhookHandler = async (req: NextRequest) => {
   if (req.method === "POST") {
-    const buf = await getRawBody(req);
-    const sig = req.headers["stripe-signature"]!;
+    const buf = await getRawBody(await req.json());
+    const sig = req.headers.get("stripe-signature")!;
 
     let event: Stripe.Event;
 
@@ -37,8 +37,15 @@ const webhookHandler = async (req: NextApiRequest, res: NextApiResponse) => {
       // On error, log and return the error message.
       if (err! instanceof Error) console.log(err);
       console.log(`❌ Error message: ${errorMessage}`);
-      res.status(400).send(`Webhook Error: ${errorMessage}`);
-      return;
+      
+      return NextResponse.json(
+        {
+          error: {
+            message: `Webhook Error: ${errorMessage}`,
+          },
+        },
+        { status: 400 }
+      );
     }
 
     // Successfully constructed event.
@@ -76,12 +83,20 @@ const webhookHandler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     // Return a response to acknowledge receipt of the event.
-    res.json({ received: true });
+    return NextResponse.json({ received: true });
   } else {
-    res.setHeader("Allow", "POST");
-    res.status(405).end("Method Not Allowed");
+    return NextResponse.json(
+        {
+          error: {
+            message: `Method Not Allowed`,
+          },
+        },
+        { status: 405 },
+      ).headers.set("Allow", "POST");
+    // res.setHeader("Allow", "POST");
+    // res.status(405).end("Method Not Allowed");
   }
 };
 
 // export default cors(webhookHandler as any);
-export default webhookHandler;
+export { webhookHandler as POST };
