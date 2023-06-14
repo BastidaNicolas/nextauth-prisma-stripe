@@ -4,9 +4,9 @@ import getRawBody from "raw-body";
 import Cors from 'micro-cors';
 import prisma from "../../../prisma/prisma";
 
-const cors = Cors({
-  allowMethods: ['POST', 'HEAD'],
-});
+// const cors = Cors({
+//   allowMethods: ['POST', 'HEAD'],
+// });
 
 export const config = {
   api: {
@@ -14,13 +14,13 @@ export const config = {
   },
 };
 
-async function buffer(readable:any) {
-  const chunks = [];
-  for await (const chunk of readable) {
-    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
-  }
-  return Buffer.concat(chunks);
-}
+// async function buffer(readable:any) {
+//   const chunks = [];
+//   for await (const chunk of readable) {
+//     chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+//   }
+//   return Buffer.concat(chunks);
+// }
 
 const handler = async (
   req: NextApiRequest,
@@ -34,11 +34,11 @@ const handler = async (
 
   if (req.method === "POST") {
     const sig = req.headers["stripe-signature"]!;
-    const body = await buffer(req);
     let event: Stripe.Event
 
     try {
-      event = stripe.webhooks.constructEvent(body.toString(), sig, webhookSecret);
+      const body = await buffer(req);
+      event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
     } catch (err) {
       // On error, log and return the error message
       console.log(`❌ Error message: ${err}`);
@@ -99,20 +99,21 @@ const handler = async (
   }
 };
 
-// const buffer = (req: NextApiRequest) => {
-//   return new Promise<Buffer>((resolve, reject) => {
-//     const chunks: Buffer[] = [];
+const buffer = (req: NextApiRequest) => {
+  return new Promise<Buffer>((resolve, reject) => {
+    const chunks: Buffer[] = [];
 
-//     req.on("data", (chunk: Buffer) => {
-//       chunks.push(chunk);
-//     });
+    req.on("data", (chunk: Buffer) => {
+      chunks.push(chunk);
+    });
 
-//     req.on("end", () => {
-//       resolve(Buffer.concat(chunks));
-//     });
+    req.on("end", () => {
+      resolve(Buffer.concat(chunks));
+    });
 
-//     req.on("error", reject);
-//   });
-// };
+    req.on("error", reject);
+  });
+};
 
-export default cors(handler as any);
+// export default cors(handler as any);
+export default handler;
