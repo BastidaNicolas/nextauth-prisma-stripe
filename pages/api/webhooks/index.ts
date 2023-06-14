@@ -1,3 +1,8 @@
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 import Stripe from "stripe";
 import { NextApiRequest, NextApiResponse } from "next";
 import getRawBody from "raw-body";
@@ -8,12 +13,6 @@ import prisma from "../../../prisma/prisma";
 const cors = Cors({
   allowMethods: ['POST', 'HEAD'],
 });
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
 
 // async function buffer(readable:any) {
 //   const chunks = [];
