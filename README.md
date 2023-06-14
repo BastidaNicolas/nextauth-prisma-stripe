@@ -188,7 +188,60 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
                 ```typescript
                 return NextResponse.json({ session: checkoutSession }, { status: 200 });
                 ```
-            - LOADING...
+            - Let's go to the front-end and add a checkout button on whatever page you want:
+                ```jsx
+                <button
+                    className='bg-slate-100 hover:bg-slate-200 text-black px-6 py-2 rounded-md capitalize font-bold mt-1'
+                    onClick={() => handleCreateCheckoutSession(plan)}
+                >
+                    Go To Checkout
+                </button>
+                ```
+                - Create the `handleCreateCheckoutSession(productId)` async function that receives `productId`. I'll just declare a variable `plan` that contains a product ID.
+                    - Create a product in your Stripe dashboard and copy its ID, then save it in a variable.
+                    - Inside the function, perform a fetch to your checkout endpoint and add the product ID to the body:
+                        ```javascript
+                        const res = await fetch(`/api/stripe/checkout-session`, {
+                            method: "POST",
+                            body: JSON.stringify(productId),
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                        });
+                        ```
+                    - The response from the POST request, which should be a checkout session, needs to be parsed and assigned to a variable. Here's an example:
+                        ```javascript
+                        const checkoutSession = await res.json().then((value) => {
+                            return value.session;
+                        });
+                        ```
+                    - Now create a `/app/utils/getStripe.ts` file. Here, we'll declare a reusable `stripePromise`. If `stripePromise` already exists, we won't create a new one but use the already created instance ([read more](https://vercel.com/guides/getting-started-with-nextjs-typescript-stripe#loading-stripe.js)) . The code should look like this:
+                        ```javascript
+                        import { Stripe, loadStripe } from '@stripe/stripe-js';
+            
+                        let stripePromise: Promise<Stripe | null>;
+                        const getStripe = () => {
+                            if (!stripePromise) {
+                                stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+                            }
+                            return stripePromise;
+                        };
+            
+                        export default getStripe;
+                        ```
+                    - Going back to `handleCreateCheckoutSession()`, we'll continue by declaring a `stripe` variable and await `getStripe()`. Then, we'll use it for the redirect. Here's an example:
+                        ```javascript
+                        const stripe = await getStripe();
+                        const { error } = await stripe!.redirectToCheckout({
+                            sessionId: checkoutSession.id,
+                        });
+                        // If `redirectToCheckout` fails due to a browser or network
+                        // error, display the localized error message to your customer
+                        // using `error.message`.
+                        console.warn(error.message);
+                        ```
+                    - That should be all for the checkout to work. Now you should be able to log in, log out, and start a checkout. The next step is to handle Stripe webhooks to modify the `isActive` value of the `User` in the database if the user has paid or the subscription has been canceled.
+    - 
     
 
 ## Run The Project Locally
