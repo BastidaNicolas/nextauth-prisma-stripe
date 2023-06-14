@@ -110,6 +110,12 @@
 import Stripe from 'stripe';
 import {NextApiRequest, NextApiResponse} from 'next';
 
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 const handler = async (
   req: NextApiRequest,
   res: NextApiResponse
@@ -127,7 +133,7 @@ const handler = async (
 
     try {
       const body = await buffer(req);
-      event = stripe.webhooks.constructEvent(body.toString(), sig, webhookSecret);
+      event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
     } catch (err) {
       // On error, log and return the error message
       console.log(`❌ Error message: ${err}`);
@@ -156,12 +162,6 @@ const handler = async (
     res.setHeader('Allow', 'POST');
     res.status(405).end('Method Not Allowed');
   }
-};
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
 };
 
 const buffer = (req: NextApiRequest) => {
