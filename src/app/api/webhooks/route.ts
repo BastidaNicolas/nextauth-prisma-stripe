@@ -24,8 +24,8 @@ const webhookSecret: string = process.env.STRIPE_WEBHOOK_SECRET!;
 // });
 
 const webhookHandler = async (req: NextRequest) => {
-  if (req.method === "POST") {
-    const buf = await getRawBody(await req.json());
+//   if (req.method === "POST") {
+    const buf = await req.text();
     const sig = req.headers.get("stripe-signature")!;
 
     let event: Stripe.Event;
@@ -84,18 +84,18 @@ const webhookHandler = async (req: NextRequest) => {
 
     // Return a response to acknowledge receipt of the event.
     return NextResponse.json({ received: true });
-  } else {
-    return NextResponse.json(
-        {
-          error: {
-            message: `Method Not Allowed`,
-          },
-        },
-        { status: 405 },
-      ).headers.set("Allow", "POST");
-    // res.setHeader("Allow", "POST");
-    // res.status(405).end("Method Not Allowed");
-  }
+//   } else {
+//     return NextResponse.json(
+//         {
+//           error: {
+//             message: `Method Not Allowed`,
+//           },
+//         },
+//         { status: 405 },
+//       ).headers.set("Allow", "POST");
+//     // res.setHeader("Allow", "POST");
+//     // res.status(405).end("Method Not Allowed");
+//   }
 };
 
 // export default cors(webhookHandler as any);
