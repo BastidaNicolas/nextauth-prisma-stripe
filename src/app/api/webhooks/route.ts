@@ -1,8 +1,5 @@
-import { NextApiRequest, NextApiResponse } from "next";
-
 import Stripe from "stripe";
 import prisma from "../../../../prisma/prisma";
-import getRawBody from "raw-body";
 import { NextRequest, NextResponse } from "next/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -12,19 +9,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 const webhookSecret: string = process.env.STRIPE_WEBHOOK_SECRET!;
 
-// Stripe requires the raw body to construct the event.
-// export const config = {
-//   api: {
-//     bodyParser: false,
-//   },
-// };
-
-// const cors = Cors({
-//   allowMethods: ["POST", "HEAD"],
-// });
-
 const webhookHandler = async (req: NextRequest) => {
-//   if (req.method === "POST") {
+  try {
     const buf = await req.text();
     const sig = req.headers.get("stripe-signature")!;
 
@@ -37,7 +23,7 @@ const webhookHandler = async (req: NextRequest) => {
       // On error, log and return the error message.
       if (err! instanceof Error) console.log(err);
       console.log(`❌ Error message: ${errorMessage}`);
-      
+
       return NextResponse.json(
         {
           error: {
@@ -84,19 +70,16 @@ const webhookHandler = async (req: NextRequest) => {
 
     // Return a response to acknowledge receipt of the event.
     return NextResponse.json({ received: true });
-//   } else {
-//     return NextResponse.json(
-//         {
-//           error: {
-//             message: `Method Not Allowed`,
-//           },
-//         },
-//         { status: 405 },
-//       ).headers.set("Allow", "POST");
-//     // res.setHeader("Allow", "POST");
-//     // res.status(405).end("Method Not Allowed");
-//   }
+  } catch {
+    return NextResponse.json(
+      {
+        error: {
+          message: `Method Not Allowed`,
+        },
+      },
+      { status: 405 }
+    ).headers.set("Allow", "POST");
+  }
 };
 
-// export default cors(webhookHandler as any);
 export { webhookHandler as POST };
