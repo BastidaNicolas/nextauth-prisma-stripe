@@ -107,102 +107,105 @@
 // export default cors(handler as any);
 // // export default handler;
 
-// import { NextApiRequest, NextApiResponse } from 'next'
+import { NextApiRequest, NextApiResponse } from 'next'
 
-// import Cors from 'micro-cors'
-// import Stripe from 'stripe'
-// import { buffer } from 'micro'
+import Cors from 'micro-cors'
+import Stripe from 'stripe'
+import { buffer } from 'micro'
 
-// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-//   // https://github.com/stripe/stripe-node#configuration
-//   apiVersion: '2022-11-15',
-// })
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  // https://github.com/stripe/stripe-node#configuration
+  apiVersion: '2022-11-15',
+})
 
-// const webhookSecret: string = process.env.STRIPE_WEBHOOK_SECRET!
+const webhookSecret: string = process.env.STRIPE_WEBHOOK_SECRET!
 
-// // Stripe requires the raw body to construct the event.
-// export const config = {
-//   api: {
-//     bodyParser: false,
-//   },
-// }
+// Stripe requires the raw body to construct the event.
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+}
 
-// const cors = Cors({
-//   allowMethods: ['POST', 'HEAD'],
-// })
+const cors = Cors({
+  allowMethods: ['POST', 'HEAD'],
+})
 
-// const webhookHandler = async (req: NextApiRequest, res: NextApiResponse) => {
-//   if (req.method === 'POST') {
-//     const buf = await buffer(req)
-//     const sig = req.headers['stripe-signature']!
+const webhookHandler = async (req: NextApiRequest, res: NextApiResponse) => {
+  if (req.method === 'POST') {
+    const buf = await buffer(req)
+    const sig = req.headers['stripe-signature']!
 
-//     let event: Stripe.Event
+    console.log(buf)
+    console.log(buf.toString())
 
-//     try {
-//       event = stripe.webhooks.constructEvent(buf.toString(), sig, webhookSecret)
-//     } catch (err) {
-//       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-//       // On error, log and return the error message.
-//       if (err! instanceof Error) console.log(err)
-//       console.log(`❌ Error message: ${errorMessage}`)
-//       res.status(400).send(`Webhook Error: ${errorMessage}`)
-//       return
-//     }
+    let event: Stripe.Event
 
-//     // Successfully constructed event.
-//     console.log('✅ Success:', event.id)
+    try {
+      event = stripe.webhooks.constructEvent(buf.toString(), sig, webhookSecret)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      // On error, log and return the error message.
+      if (err! instanceof Error) console.log(err)
+      console.log(`❌ Error message: ${errorMessage}`)
+      res.status(400).send(`Webhook Error: ${errorMessage}`)
+      return
+    }
 
-//     // Cast event data to Stripe object.
-//     if (event.type === 'payment_intent.succeeded') {
-//       const paymentIntent = event.data.object as Stripe.PaymentIntent
-//       console.log(`💰 PaymentIntent status: ${paymentIntent.status}`)
-//     } else if (event.type === 'payment_intent.payment_failed') {
-//       const paymentIntent = event.data.object as Stripe.PaymentIntent
-//       console.log(
-//         `❌ Payment failed: ${paymentIntent.last_payment_error?.message}`
-//       )
-//     } else if (event.type === 'charge.succeeded') {
-//       const charge = event.data.object as Stripe.Charge
-//       console.log(`💵 Charge id: ${charge.id}`)
-//     } else {
-//       console.warn(`🤷‍♀️ Unhandled event type: ${event.type}`)
-//     }
+    // Successfully constructed event.
+    console.log('✅ Success:', event.id)
 
-//     // Return a response to acknowledge receipt of the event.
-//     res.json({ received: true })
-//   } else {
-//     res.setHeader('Allow', 'POST')
-//     res.status(405).end('Method Not Allowed')
-//   }
-// }
+    // Cast event data to Stripe object.
+    if (event.type === 'payment_intent.succeeded') {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent
+      console.log(`💰 PaymentIntent status: ${paymentIntent.status}`)
+    } else if (event.type === 'payment_intent.payment_failed') {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent
+      console.log(
+        `❌ Payment failed: ${paymentIntent.last_payment_error?.message}`
+      )
+    } else if (event.type === 'charge.succeeded') {
+      const charge = event.data.object as Stripe.Charge
+      console.log(`💵 Charge id: ${charge.id}`)
+    } else {
+      console.warn(`🤷‍♀️ Unhandled event type: ${event.type}`)
+    }
 
-// export default cors(webhookHandler as any)
-
-import { buffer } from "micro";
-import { NextApiRequest, NextApiResponse } from "next";
-
-export const config = { api: { bodyParser: false } };
-
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-  const signature = req.headers["stripe-signature"];
-  const signingSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
-  const reqBuffer = await buffer(req);
-
-  let event;
-
-  console.log(reqBuffer)
-
-  try {
-    event = stripe.webhooks.constructEvent(reqBuffer, signature, signingSecret);
-  } catch (error: any) {
-    console.log(error);
-    return res.status(400).send(`Webhook error: ${error?.message}`);
+    // Return a response to acknowledge receipt of the event.
+    res.json({ received: true })
+  } else {
+    res.setHeader('Allow', 'POST')
+    res.status(405).end('Method Not Allowed')
   }
+}
 
-  console.log({ event });
+export default cors(webhookHandler as any)
 
-  res.send({ received: true });
-};
+// import { buffer } from "micro";
+// import { NextApiRequest, NextApiResponse } from "next";
 
-export default handler;
+// export const config = { api: { bodyParser: false } };
+
+// const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+//   const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+//   const signature = req.headers["stripe-signature"];
+//   const signingSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
+//   const reqBuffer = await buffer(req);
+
+//   let event;
+
+//   console.log(reqBuffer)
+
+//   try {
+//     event = stripe.webhooks.constructEvent(reqBuffer, signature, signingSecret);
+//   } catch (error: any) {
+//     console.log(error);
+//     return res.status(400).send(`Webhook error: ${error?.message}`);
+//   }
+
+//   console.log({ event });
+
+//   res.send({ received: true });
+// };
+
+// export default handler;
