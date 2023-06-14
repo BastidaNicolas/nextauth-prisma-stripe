@@ -1,120 +1,172 @@
+// export const config = {
+//   api: {
+//     bodyParser: false,
+//   },
+// };
+// import Stripe from "stripe";
+// import { NextApiRequest, NextApiResponse } from "next";
+// import getRawBody from "raw-body";
+// import Cors from 'micro-cors';
+// import { buffer } from "micro";
+// import prisma from "../../../prisma/prisma";
+
+// const cors = Cors({
+//   allowMethods: ['POST', 'HEAD'],
+// });
+
+// // async function buffer(readable:any) {
+// //   const chunks = [];
+// //   for await (const chunk of readable) {
+// //     chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+// //   }
+// //   return Buffer.concat(chunks);
+// // }
+// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+//   apiVersion: "2022-11-15",
+// });
+
+// const webhookSecret: string = process.env.STRIPE_WEBHOOK_SECRET!;
+
+// const handler = async (
+//   req: NextApiRequest,
+//   res: NextApiResponse
+// ): Promise<void> => {
+
+//   if (req.method === "POST") {
+//     const body = await buffer(req);
+//     const sig = req.headers["stripe-signature"]!;
+//     let event: Stripe.Event
+
+//     try {
+//       event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
+//     } catch (err) {
+//       // On error, log and return the error message
+//       console.log(`❌ Error message: ${err}`);
+//       res.status(400).send(`Webhook Error: ${err}`);
+//       return;
+//     }
+
+//     // Successfully constructed event
+//     console.log("✅ Success:", event.id);
+
+//     // Cast event data to Stripe object
+//     if (event.type === "payment_intent.succeeded") {
+//       const stripeObject: Stripe.PaymentIntent = event.data
+//         .object as Stripe.PaymentIntent;
+//       console.log(`💰 PaymentIntent status: ${stripeObject.status}`);
+//     } else if (event.type === "charge.succeeded") {
+//       const charge = event.data.object as Stripe.Charge;
+//       console.log(`💵 Charge id: ${charge.id}`);
+//     } else {
+//       console.warn(`🤷‍♀️ Unhandled event type: ${event.type}`);
+//     }
+
+//     // switch (event.type) {
+//     //   cccc
+//       // case "customer.subscription.deleted":
+//       //   await prisma.user.update({
+//       //     // Find the customer in our database with the Stripe customer ID linked to this purchase
+//       //     where: {
+//       //       stripeCustomerId: subscription.customer as string,
+//       //     },
+//       //     // Update that customer so their status is now active
+//       //     data: {
+//       //       isActive: false,
+//       //     },
+//       //   });
+//       //   break;
+//     //   default:
+//     //     console.warn(`🤷‍♀️ Unhandled event type: ${event.type}`);
+//     // }
+
+//     // Return a response to acknowledge receipt of the event
+//     res.json({ received: true });
+//   } else {
+//     res.setHeader("Allow", "POST");
+//     res.status(405).end("Method Not Allowed");
+//   }
+// };
+
+// // const buffer = (req: NextApiRequest) => {
+// //   return new Promise<Buffer>((resolve, reject) => {
+// //     const chunks: Buffer[] = [];
+
+// //     req.on("data", (chunk: Buffer) => {
+// //       chunks.push(chunk);
+// //     });
+
+// //     req.on("end", () => {
+// //       resolve(Buffer.concat(chunks));
+// //     });
+
+// //     req.on("error", reject);
+// //   });
+// // };
+
+// export default cors(handler as any);
+// // export default handler;
+
+import type { NextApiRequest, NextApiResponse } from "next";
+import getRawBody from "raw-body";
+import prisma from "../../../prisma/prisma";
+import Stripe from "stripe";
+
 export const config = {
   api: {
     bodyParser: false,
   },
 };
-import Stripe from "stripe";
-import { NextApiRequest, NextApiResponse } from "next";
-import getRawBody from "raw-body";
-import Cors from 'micro-cors';
-import { buffer } from "micro";
-import prisma from "../../../prisma/prisma";
 
-const cors = Cors({
-  allowMethods: ['POST', 'HEAD'],
-});
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  const body = await getRawBody(req);
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
 
-// async function buffer(readable:any) {
-//   const chunks = [];
-//   for await (const chunk of readable) {
-//     chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
-//   }
-//   return Buffer.concat(chunks);
-// }
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2022-11-15",
-});
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+    apiVersion: "2022-11-15",
+  });
 
-const webhookSecret: string = process.env.STRIPE_WEBHOOK_SECRET!;
-
-const handler = async (
-  req: NextApiRequest,
-  res: NextApiResponse
-): Promise<void> => {
-
-
-  if (req.method === "POST") {
-    const body = await buffer(req);
-    const sig = req.headers["stripe-signature"]!;
-    let event: Stripe.Event
-
+  let event = req.body;
+  // Only verify the event if you have an endpoint secret defined.
+  // Otherwise use the basic event deserialized with JSON.parse
+  if (endpointSecret) {
+    // Get the signature sent by Stripe
     try {
-      event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
-    } catch (err) {
-      // On error, log and return the error message
-      console.log(`❌ Error message: ${err}`);
-      res.status(400).send(`Webhook Error: ${err}`);
-      return;
+      event = stripe.webhooks.constructEvent(
+        body,
+        req.headers["stripe-signature"] as string,
+        endpointSecret
+      );
+    } catch (err: any) {
+      console.log(`⚠️  Webhook signature verification failed.`, err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
     }
-
-    // Successfully constructed event
-    console.log("✅ Success:", event.id);
-
-    // Cast event data to Stripe object
-    if (event.type === "payment_intent.succeeded") {
-      const stripeObject: Stripe.PaymentIntent = event.data
-        .object as Stripe.PaymentIntent;
-      console.log(`💰 PaymentIntent status: ${stripeObject.status}`);
-    } else if (event.type === "charge.succeeded") {
-      const charge = event.data.object as Stripe.Charge;
-      console.log(`💵 Charge id: ${charge.id}`);
-    } else {
-      console.warn(`🤷‍♀️ Unhandled event type: ${event.type}`);
-    }
-
-    // switch (event.type) {
-    //   case "customer.subscription.created":
-    // const subscription = event.data.object as Stripe.Subscription;
-    //     await prisma.user.update({
-    //       // Find the customer in our database with the Stripe customer ID linked to this purchase
-    //       where: {
-    //         stripeCustomerId: subscription.customer as string,
-    //       },
-    //       // Update that customer so their status is now active
-    //       data: {
-    //         isActive: true,
-    //       },
-    //     });
-    //     break;
-      // case "customer.subscription.deleted":
-      //   await prisma.user.update({
-      //     // Find the customer in our database with the Stripe customer ID linked to this purchase
-      //     where: {
-      //       stripeCustomerId: subscription.customer as string,
-      //     },
-      //     // Update that customer so their status is now active
-      //     data: {
-      //       isActive: false,
-      //     },
-      //   });
-      //   break;
-    //   default:
-    //     console.warn(`🤷‍♀️ Unhandled event type: ${event.type}`);
-    // }
-
-    // Return a response to acknowledge receipt of the event
-    res.json({ received: true });
-  } else {
-    res.setHeader("Allow", "POST");
-    res.status(405).end("Method Not Allowed");
   }
+
+  // Handle the customer.subscription.created event
+  switch (event.type) {
+    case "customer.subscription.created":
+      try {
+        const subscription = event.data.object as Stripe.Subscription;
+        await prisma.user.update({
+          // Find the customer in our database with the Stripe customer ID linked to this purchase
+          where: {
+            stripeCustomerId: subscription.customer as string,
+          },
+          // Update that customer so their status is now active
+          data: {
+            isActive: true,
+          },
+        });
+        break;
+      } catch (error) {
+        console.log("🚀 ~ error", error);
+      }
+
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+  }
+
+  res.status(200).json({ message: "success" });
 };
 
-// const buffer = (req: NextApiRequest) => {
-//   return new Promise<Buffer>((resolve, reject) => {
-//     const chunks: Buffer[] = [];
-
-//     req.on("data", (chunk: Buffer) => {
-//       chunks.push(chunk);
-//     });
-
-//     req.on("end", () => {
-//       resolve(Buffer.concat(chunks));
-//     });
-
-//     req.on("error", reject);
-//   });
-// };
-
-export default cors(handler as any);
-// export default handler;
+export default handler;
