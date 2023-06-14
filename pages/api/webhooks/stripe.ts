@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import { NextApiRequest, NextApiResponse } from "next";
 import getRawBody from "raw-body";
 import Cors from 'micro-cors';
+import { buffer } from "micro";
 import prisma from "../../../prisma/prisma";
 
 // const cors = Cors({
@@ -99,21 +100,21 @@ const handler = async (
   }
 };
 
-const buffer = (req: NextApiRequest) => {
-  return new Promise<Buffer>((resolve, reject) => {
-    const chunks: Buffer[] = [];
+// const buffer = (req: NextApiRequest) => {
+//   return new Promise<Buffer>((resolve, reject) => {
+//     const chunks: Buffer[] = [];
 
-    req.on("data", (chunk: Buffer) => {
-      chunks.push(chunk);
-    });
+//     req.on("data", (chunk: Buffer) => {
+//       chunks.push(chunk);
+//     });
 
-    req.on("end", () => {
-      resolve(Buffer.concat(chunks));
-    });
+//     req.on("end", () => {
+//       resolve(Buffer.concat(chunks));
+//     });
 
-    req.on("error", reject);
-  });
-};
+//     req.on("error", reject);
+//   });
+// };
 
 // export default cors(handler as any);
 export default handler;
