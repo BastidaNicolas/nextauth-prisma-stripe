@@ -1,7 +1,12 @@
 import Stripe from "stripe";
 import { NextApiRequest, NextApiResponse } from "next";
 import getRawBody from "raw-body";
+import Cors from 'micro-cors';
 import prisma from "../../../prisma/prisma";
+
+const cors = Cors({
+  allowMethods: ['POST', 'HEAD'],
+});
 
 export const config = {
   api: {
@@ -110,4 +115,4 @@ const handler = async (
 //   });
 // };
 
-export default handler;
+export default cors(handler as any);
