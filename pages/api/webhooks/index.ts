@@ -126,7 +126,7 @@ const handler = async (
     let event: Stripe.Event;
 
     try {
-      const body = await buffer(req);
+      const body = await buffer(req.body);
       event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
     } catch (err) {
       // On error, log and return the error message
