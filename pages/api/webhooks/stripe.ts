@@ -38,7 +38,7 @@ const handler = async (
 
     try {
       const body = await buffer(req);
-      event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
+      event = stripe.webhooks.constructEvent(body.toString(), sig, webhookSecret);
     } catch (err) {
       // On error, log and return the error message
       console.log(`❌ Error message: ${err}`);
