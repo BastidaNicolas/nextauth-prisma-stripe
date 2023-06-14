@@ -9,6 +9,14 @@ export const config = {
   },
 };
 
+async function buffer(readable:any) {
+  const chunks = [];
+  for await (const chunk of readable) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks);
+}
+
 const handler = async (
   req: NextApiRequest,
   res: NextApiResponse
@@ -21,7 +29,7 @@ const handler = async (
 
   if (req.method === "POST") {
     const sig = req.headers["stripe-signature"];
-    const body = await getRawBody(req);
+    const body = await buffer(req);
     let event
 
     try {
