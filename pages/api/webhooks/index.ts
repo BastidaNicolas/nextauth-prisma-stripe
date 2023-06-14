@@ -5,9 +5,9 @@ import Cors from 'micro-cors';
 import { buffer } from "micro";
 import prisma from "../../../prisma/prisma";
 
-// const cors = Cors({
-//   allowMethods: ['POST', 'HEAD'],
-// });
+const cors = Cors({
+  allowMethods: ['POST', 'HEAD'],
+});
 
 // export const config = {
 //   api: {
@@ -117,5 +117,5 @@ const handler = async (
 //   });
 // };
 
-// export default cors(handler as any);
-export default handler;
+export default cors(handler as any);
+// export default handler;
