@@ -62,10 +62,10 @@ const handler = async (
     // } else {
     //   console.warn(`🤷‍♀️ Unhandled event type: ${event.type}`);
     // }
-    const subscription = event.data.object as Stripe.Subscription;
 
     switch (event.type) {
       case "customer.subscription.created":
+    const subscription = event.data.object as Stripe.Subscription;
         await prisma.user.update({
           // Find the customer in our database with the Stripe customer ID linked to this purchase
           where: {
@@ -77,18 +77,18 @@ const handler = async (
           },
         });
         break;
-      case "customer.subscription.deleted":
-        await prisma.user.update({
-          // Find the customer in our database with the Stripe customer ID linked to this purchase
-          where: {
-            stripeCustomerId: subscription.customer as string,
-          },
-          // Update that customer so their status is now active
-          data: {
-            isActive: false,
-          },
-        });
-        break;
+      // case "customer.subscription.deleted":
+      //   await prisma.user.update({
+      //     // Find the customer in our database with the Stripe customer ID linked to this purchase
+      //     where: {
+      //       stripeCustomerId: subscription.customer as string,
+      //     },
+      //     // Update that customer so their status is now active
+      //     data: {
+      //       isActive: false,
+      //     },
+      //   });
+      //   break;
       default:
         console.warn(`🤷‍♀️ Unhandled event type: ${event.type}`);
     }
