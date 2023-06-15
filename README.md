@@ -369,7 +369,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
     Learn more about webhook signing and explore webhook integration examples for various frameworks at https://github.com/stripe/stripe-node#webhook-signing
     ```
 
-    - I wasn't sure what the problem was with the payload because everything looked fine (probably a typo in the code or secret keys), but after rewriting the webhook code, it started working. So, yeah 😑. All night trying to fix that 😂.
+    - I wasn't sure what the problem was with the payload because everything looked fine, it worked in the CLI but not with the Stripe Dashboard Webhook (probably a typo in the code or secret keys), but after rewriting the webhook code, it started working. So, yeah 😑. All night trying to fix that 😂.
 
 
 
