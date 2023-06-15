@@ -32,7 +32,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 3. Setup NextAuth ([documentation](https://next-auth.js.org/getting-started/example)):
     - Install dependencies:
-    - `npm install next-auth @auth/prisma-adapter`
+        - `npm install next-auth @auth/prisma-adapter`
     - Create `/api/auth/[...nextauth]/route.ts` API route:
         - [NextAuth.js Route Handlers](https://next-auth.js.org/configuration/initialization#route-handlers-app):
             - Declare the options that go into `NextAuth()` before `handler` in a variable that is exported, so we can use it later. It should look like this:
@@ -356,7 +356,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
     - Connect to your GitHub repo and deploying the project.
 
     - Now, for the webhook to work, you need to go to your [Stripe Developer Dashboard > Webhooks](https://dashboard.stripe.com/test/webhooks) and add an endpoint. The URL will be `https://YOUR_DEPLOYMENT_URL/api/webhooks`, and it should listen for `customer.subscription.created` and `customer.subscription.deleted` events.
-    - Once created, copy the "Signing secret" and assign it to `STRIPE_WEBHOOK_SECRET`.
+        - Once created, copy the "Signing secret" and assign it to `STRIPE_WEBHOOK_SECRET`.
 
     - Make sure you have added the deployment URL to your Google OAuth Client.
 
