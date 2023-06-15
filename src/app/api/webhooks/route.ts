@@ -36,6 +36,8 @@ const webhookHandler = async (req: NextRequest) => {
 
     // Successfully constructed event.
     console.log("✅ Success:", event.id);
+
+    // getting to the data we want from the event
     const subscription = event.data.object as Stripe.Subscription;
 
     switch (event.type) {
@@ -65,6 +67,7 @@ const webhookHandler = async (req: NextRequest) => {
         break;
       default:
         console.warn(`🤷‍♀️ Unhandled event type: ${event.type}`);
+        break;
     }
 
     // Return a response to acknowledge receipt of the event.

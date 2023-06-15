@@ -286,7 +286,65 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
                 ).headers.set("Allow", "POST");
             }
             ```
-        - LOADING...
+        - Inside a `try{}catch{}` block, we will attempt to build the event (https://stripe.com/docs/identity/handle-verification-outcomes). If an error occurs, we catch it and handle it accordingly. The code should look like this:
+
+            ```typescript
+            try {
+                event = stripe.webhooks.constructEvent(buf, sig, webhookSecret);
+            } catch (err) {
+                const errorMessage = err instanceof Error ? err.message : "Unknown error";
+                // On error, log and return the error message.
+                if (!(err instanceof Error)) console.log(err);
+                console.log(`❌ Error message: ${errorMessage}`);
+
+                return NextResponse.json(
+                    {
+                    error: {
+                        message: `Webhook Error: ${errorMessage}`,
+                    },
+                    },
+                    { status: 400 }
+                );
+            }
+            ```
+        - After that, we add a `switch` statement to handle the event types sent by the Stripe webhook to this endpoint. We will handle "customer.subscription.created" and "customer.subscription.deleted" event types. In each case, we will look for the user in our database that has the same stripeCustomerId as the event and update the user's isActive value. The code should look like this:
+
+            ```typescript
+            // Getting the data we want from the event
+            const subscription = event.data.object as Stripe.Subscription;
+
+            switch (event.type) {
+                case "customer.subscription.created":
+                        await prisma.user.update({
+                        // Find the customer in our database with the Stripe customer ID linked to this purchase
+                        where: {
+                            stripeCustomerId: subscription.customer as string,
+                        },
+                        // Update that customer so their status is now active
+                        data: {
+                            isActive: true,
+                        },
+                        });
+                    break;
+                case "customer.subscription.deleted":
+                        await prisma.user.update({
+                        // Find the customer in our database with the Stripe customer ID linked to this purchase
+                        where: {
+                            stripeCustomerId: subscription.customer as string,
+                        },
+                        // Update that customer so their status is now active
+                        data: {
+                            isActive: false,
+                        },
+                        });
+                    break;
+                default:
+                        console.warn(`🤷‍♀️ Unhandled event type: ${event.type}`);
+                    break;
+            }
+            ```
+
+
 
 
 ## Run The Project Locally
