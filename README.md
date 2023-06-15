@@ -362,7 +362,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
     - After all that, everything should work! 💯 🔥 🎆 🎉 🥳.
 
- ### PROBLEMS
+### PROBLEMS
 - In the last stage, I encountered a problem with the webhook. The Stripe webhooks dashboard displayed the following error:
     ```
     Webhook Error: Error: No signatures found matching the expected signature for the payload. Are you passing the raw request body you received from Stripe? 
@@ -371,7 +371,10 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
     - I wasn't sure what the problem was with the payload because everything looked fine, it worked in the CLI but not with the Stripe Dashboard Webhook (probably a typo in the code or secret keys), but after rewriting the webhook code, it started working. So, yeah 😑. All night trying to fix that 😂.
 
+### NOTE
+The project in this repository closely follows the tutorial in terms of the concepts explained, but it includes some modifications to its user interface. The project has been structured to include login, subscription, and dashboard pages. Additionally, the useSession hook is utilized to verify if the user has permission to access a specific page.
 
+Feel free to give the project a ⭐️ emoji and contact me through any of the social media platforms shown in [my profile](https://github.com/BastidaNicolas).
 
 
 ## Run The Project Locally
