@@ -1,4 +1,5 @@
-## Next-Auth, Prisma & Stripe Tutorial. (Next.js /app)
+# How To Integrate Subscriptions Into Your Next.js Project (/app). (Next.js, Next-Auth, Prisma, Stripe)
+![nextauth-prisma-stripe vercel app_subscription](https://github.com/BastidaNicolas/nextauth-prisma-stripe/assets/74965310/8d54f9ac-0121-416c-a83e-63f3ec6d794a)
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 1. Run the following command to create a new Next.js app:
     ```
