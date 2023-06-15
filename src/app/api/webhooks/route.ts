@@ -36,6 +36,7 @@ const webhookHandler = async (req: NextRequest) => {
 
     // Successfully constructed event.
     console.log("✅ Success:", event.id);
+    const subscription = event.data.object as Stripe.Subscription;
 
     switch (event.type) {
       case "customer.subscription.created":
@@ -43,7 +44,7 @@ const webhookHandler = async (req: NextRequest) => {
         await prisma.user.update({
           // Find the customer in our database with the Stripe customer ID linked to this purchase
           where: {
-            stripeCustomerId: subscriptio.customer as string,
+            stripeCustomerId: subscription.customer as string,
           },
           // Update that customer so their status is now active
           data: {
@@ -52,7 +53,6 @@ const webhookHandler = async (req: NextRequest) => {
         });
         break;
       case "customer.subscription.deleted":
-        const subscription = event.data.object as Stripe.Subscription;
         await prisma.user.update({
           // Find the customer in our database with the Stripe customer ID linked to this purchase
           where: {
