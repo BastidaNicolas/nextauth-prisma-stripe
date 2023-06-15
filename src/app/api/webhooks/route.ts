@@ -40,7 +40,6 @@ const webhookHandler = async (req: NextRequest) => {
 
     switch (event.type) {
       case "customer.subscription.created":
-        const subscriptio = event.data.object as Stripe.Subscription;
         await prisma.user.update({
           // Find the customer in our database with the Stripe customer ID linked to this purchase
           where: {
