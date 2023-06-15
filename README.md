@@ -241,8 +241,53 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
                         console.warn(error.message);
                         ```
                     - That should be all for the checkout to work. Now you should be able to log in, log out, and start a checkout. The next step is to handle Stripe webhooks to modify the `isActive` value of the `User` in the database if the user has paid or the subscription has been canceled.
-    - 
-    
+    - Let's start with the Stripe webhook.
+      - Create `/api/webhooks/route.ts`.
+        - Initialize Stripe, the `webhookSecret` variable, and the `webhookHandler` async arrow function, and export it as POST. It should look like this:
+            ```typescript
+            import Stripe from "stripe";
+            import prisma from "../../../../prisma/prisma";
+            import { NextRequest, NextResponse } from "next/server";
+            
+            const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+              apiVersion: "2022-11-15",
+            });
+            
+            const webhookSecret: string = process.env.STRIPE_WEBHOOK_SECRET!;
+            
+            const webhookHandler = async (req: NextRequest) => {
+                // We are going to add things here
+            };
+            
+            export { webhookHandler as POST };
+            ```
+        - Inside a `try{}catch{}` block, initialize variables to save the request in text form, the "stripe-signature" header, and a `let` variable that is initially undefined. This last variable is used to save the Stripe webhook event that will be created. The code should look like this:
+
+            ```typescript
+            try {
+                const buf = await req.text();
+                const sig = req.headers.get("stripe-signature")!;
+
+                let event: Stripe.Event;
+                
+                // Rest of the code goes here                        
+
+                // Return a response to acknowledge receipt of the event.
+                return NextResponse.json({ received: true });
+            } catch {
+                // If an error occurs
+                return NextResponse.json(
+                    {
+                        error: {
+                            message: `Method Not Allowed`,
+                        },
+                    },
+                    { status: 405 }
+                ).headers.set("Allow", "POST");
+            }
+            ```
+        - LOADING...
+
 
 ## Run The Project Locally
 
