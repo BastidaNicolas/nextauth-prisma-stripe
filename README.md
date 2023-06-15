@@ -286,7 +286,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
                 ).headers.set("Allow", "POST");
             }
             ```
-        - Inside a `try{}catch{}` block, we will attempt to build the event (https://stripe.com/docs/identity/handle-verification-outcomes). If an error occurs, we catch it and handle it accordingly. The code should look like this:
+        - Inside a `try{}catch{}` block, we will attempt to build the event ([read more](https://stripe.com/docs/identity/handle-verification-outcomes)). If an error occurs, we catch it and handle it accordingly. The code should look like this:
 
             ```typescript
             try {
