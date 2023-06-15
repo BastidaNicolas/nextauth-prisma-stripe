@@ -343,6 +343,33 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
                     break;
             }
             ```
+        - To test this API endpoint locally, you'll have to install the Stripe CLI on your machine. [Stripe CLI](https://stripe.com/docs/stripe-cli)
+
+            - After following the steps to log in to the CLI, follow [this guide](https://stripe.com/docs/webhooks/test#listen-for-events). In this case, the URL would be `http://localhost:3000/api/webhooks`. Copy the webhook secret key that it gives you and add it to your `.env` file.
+
+    - Now you should be able to go through the login/logout, checkout, and, if successful, change the `isActive` value to true and if the subscription gets canceled, change it to false.
+
+5. Deploying it
+
+    - Checkout the `.env.example` file in this repository. It should show you all the necessary environment variables needed for this project. If you are deploying to Vercel, you won't need "NEXTAUTH_URL". You can quickly generate the `NEXTAUTH_SECRET` by running `openssl rand -base64 32` in your terminal.
+
+    - Connect to your GitHub repo and deploying the project.
+
+    - Now, for the webhook to work, you need to go to your [Stripe Developer Dashboard > Webhooks](https://dashboard.stripe.com/test/webhooks) and add an endpoint. The URL will be `https://YOUR_DEPLOYMENT_URL/api/webhooks`, and it should listen for `customer.subscription.created` and `customer.subscription.deleted` events.
+    - Once created, copy the "Signing secret" and assign it to `STRIPE_WEBHOOK_SECRET`.
+
+    - Make sure you have added the deployment URL to your Google OAuth Client.
+
+    - After all that, everything should work! 💯 🔥 🎆 🎉 🥳.
+
+ ### PROBLEMS
+- In the last stage, I encountered a problem with the webhook. The Stripe webhooks dashboard displayed the following error:
+    ```
+    Webhook Error: Error: No signatures found matching the expected signature for the payload. Are you passing the raw request body you received from Stripe? 
+    Learn more about webhook signing and explore webhook integration examples for various frameworks at https://github.com/stripe/stripe-node#webhook-signing
+    ```
+
+    - I wasn't sure what the problem was with the payload because everything looked fine (probably a typo in the code or secret keys), but after rewriting the webhook code, it started working. So, yeah 😑. All night trying to fix that 😂.
 
 
 
